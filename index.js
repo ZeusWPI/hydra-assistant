@@ -64,13 +64,12 @@ function show_menu(agent) {
             return response.json();
         } else {
             console.log("No menu was found.");
-            agent.add('Er is geen menu gevonden.');
         }
-    }).then(function(json) {
+    }).then(function (json) {
         respondWithJson(json, date, agent);
     }).catch(reason => {
         console.warn(reason);
-        agent.add(`Er is geen menu gevonden voor ${restoParam}.`);
+        agent.add(`Er is geen menu gevonden voor ${restoParam}: ${reason}`);
     });
 }
 
@@ -103,7 +102,14 @@ function respondWithJson(json, date, agent) {
 
         let names = [...soups, ...nonSoups];
 
-        let nameString = new Intl.ListFormat('nl').format(names);
+        let nameString = "";
+        const hasICU = typeof Intl === 'object';
+        if (hasICU) {
+            nameString = new Intl.ListFormat('nl').format(names);
+        } else {
+            console.log("NodeJS is built by idiots.");
+            nameString = names.slice(0, -1).join(',') + ' en ' + names.slice(-1);
+        }
 
         const assistant = agent.conv();
         const hasScreen = assistant && assistant.surface.capabilities.has('actions.capability.SCREEN_OUTPUT');
@@ -119,12 +125,12 @@ function respondWithJson(json, date, agent) {
             .filter((m => m.kind !== 'soup'))
             .map(m => [m.name, m.price]);
         const table = new Table({
-             dividers: true,
-             columns: ['Item', 'Prijs'],
-             rows: otherRows.concat(mealRows),
-         });
+            dividers: true,
+            columns: ['Item', 'Prijs'],
+            rows: otherRows.concat(mealRows),
+        });
 
-        const text = `<speak>Hier is het menu van <say-as interpret-as="date" format="dm">${date.getDate()}-${date.getMonth()+1}</say-as>:</speak>`;
+        const text = `<speak>Hier is het menu van <say-as interpret-as="date" format="dm">${date.getDate()}-${date.getMonth() + 1}</say-as>:</speak>`;
         assistant.close(text, table);
         agent.add(assistant);
     } else {
@@ -153,7 +159,7 @@ const app = express().use(express.json());
 /**
  * We listen to all requests, and pass it to the dialog app.
  */
-app.post('/assistant', function(request, response) {
+app.post('/assistant', function (request, response) {
 
     // The agent.
     const agent = new WebhookClient({request, response});
