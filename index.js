@@ -108,7 +108,7 @@ function respondWithJson(json, date, agent) {
             nameString = new Intl.ListFormat('nl').format(names);
         } else {
             console.log("NodeJS is built by idiots.");
-            nameString = names.slice(0, -1).join(',') + ' en ' + names.slice(-1);
+            nameString = names.slice(0, -1).join(', ') + ' en ' + names.slice(-1);
         }
 
         const assistant = agent.conv();
