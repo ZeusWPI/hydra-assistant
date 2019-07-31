@@ -90,7 +90,7 @@ function resto_not_recognized(agent, resto) {
  */
 function respondWithJson(json, date, agent) {
 
-    if (json.open && json.meals !== null && json.meals !== undefined) {
+    if (json !== undefined && json.open && json.meals !== null && json.meals !== undefined) {
         let nonSoups = json.meals
             .filter(m => m.kind !== 'soup')
             .map(m => m.name);
@@ -103,7 +103,7 @@ function respondWithJson(json, date, agent) {
         let names = [...soups, ...nonSoups];
 
         let nameString = "";
-        const hasICU = typeof Intl === 'object';
+        const hasICU = typeof Intl.ListFormat === 'function';
         if (hasICU) {
             nameString = new Intl.ListFormat('nl').format(names);
         } else {
@@ -135,7 +135,7 @@ function respondWithJson(json, date, agent) {
         agent.add(assistant);
     } else {
         console.log(json);
-        if (json.message) {
+        if (json !== undefined && json.message) {
             agent.add(`De resto is gesloten met dit bericht: ${json.message}`);
         } else {
             agent.add('De resto is gesloten.');
